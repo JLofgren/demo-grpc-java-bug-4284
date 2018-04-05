@@ -18,7 +18,10 @@ package io.grpc.examples.helloworld;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.MetadataUtils;
+
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,14 +40,22 @@ public class HelloWorldClient {
     this(ManagedChannelBuilder.forAddress(host, port)
         // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
         // needing certificates.
-        .usePlaintext(true)
+        .usePlaintext()
         .build());
   }
 
   /** Construct client for accessing RouteGuide server using the existing channel. */
   HelloWorldClient(ManagedChannel channel) {
     this.channel = channel;
-    blockingStub = GreeterGrpc.newBlockingStub(channel);
+
+    Metadata extraHeaders = new Metadata();
+    String bigHeaderVal = new String(new char[1024*9]).replace('\0', 'X');
+    extraHeaders.put(Metadata.Key.of(
+            "x-big-header", Metadata.ASCII_STRING_MARSHALLER),
+            bigHeaderVal);
+
+    blockingStub = MetadataUtils.attachHeaders(
+            GreeterGrpc.newBlockingStub(channel), extraHeaders);
   }
 
   public void shutdown() throws InterruptedException {
