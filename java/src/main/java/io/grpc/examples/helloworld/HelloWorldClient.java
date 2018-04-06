@@ -32,6 +32,14 @@ import java.util.logging.Logger;
 public class HelloWorldClient {
   private static final Logger logger = Logger.getLogger(HelloWorldClient.class.getName());
 
+  private static final String HOST = "localhost";
+
+  /* DEMO: The connection will work if talking directly to the server at port
+  50051, but will fail if connecting through envoy proxy at port 40051.
+  Envoy sets NO VALUE for SETTINGS_MAX_HEADER_LIST_SIZE. */
+  private static final int DEFAULT_PORT = 50051;
+//  private static final int DEFAULT_PORT = 40051;
+
   private final ManagedChannel channel;
   private final GreeterGrpc.GreeterBlockingStub blockingStub;
 
@@ -48,6 +56,10 @@ public class HelloWorldClient {
   HelloWorldClient(ManagedChannel channel) {
     this.channel = channel;
 
+    /* DEMO: Add a header larger than 8k, but still smaller than the limit of
+    100k that the server has explicitly set. This demonstrates how the client
+    will enforce an arbitrary header size limit even when the server does not
+    set the SETTINGS_MAX_HEADER_LIST_SIZE. */
     Metadata extraHeaders = new Metadata();
     String bigHeaderVal = new String(new char[1024*9]).replace('\0', 'X');
     extraHeaders.put(Metadata.Key.of(
@@ -81,16 +93,20 @@ public class HelloWorldClient {
    * greeting.
    */
   public static void main(String[] args) throws Exception {
-    HelloWorldClient client = new HelloWorldClient("localhost", 50051);
+    HelloWorldClient client = null;
     try {
-      /* Access a service running on the local machine on port 50051 */
-      String user = "Java";
+      /* Access a service running on the HOST on port DEFAULT_PORT */
+      String user = "Java client";
+      int port = DEFAULT_PORT;
       if (args.length > 0) {
-        user = args[0]; /* Use the arg as the name to greet if provided */
+        port = Integer.parseInt(args[0]); /* Use the arg as the port to attach to if provided */
       }
+      client = new HelloWorldClient(HOST, port);
       client.greet(user);
     } finally {
-      client.shutdown();
+      if (client != null) {
+        client.shutdown();
+      }
     }
   }
 }

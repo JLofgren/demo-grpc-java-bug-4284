@@ -18,6 +18,7 @@ package io.grpc.examples.helloworld;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -33,10 +34,14 @@ public class HelloWorldServer {
   private void start() throws IOException {
     /* The port on which the server should run */
     int port = 50051;
-    server = ServerBuilder.forPort(port)
-        .addService(new GreeterImpl())
-        .build()
-        .start();
+
+    /* DEMO: Set a maxHeaderListSize of 100k. This is much larger than the
+     default of 8k. */
+    server = NettyServerBuilder.forPort(port)
+            .maxHeaderListSize(1024 * 1024)
+            .addService(new GreeterImpl())
+            .build()
+            .start();
     logger.info("Server started, listening on " + port);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
@@ -79,7 +84,7 @@ public class HelloWorldServer {
     public void sayHello(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
       logger.info(String.format("Got hello from '%s'", req.getName()));
       HelloReply reply = HelloReply.newBuilder().setMessage(String.format(
-              "Nice to meet you, %s! I'm %s.", req.getName(), "Java")).build();
+              "Nice to meet you, %s! I'm %s.", req.getName(), "Java server")).build();
       responseObserver.onNext(reply);
       responseObserver.onCompleted();
     }

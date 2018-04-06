@@ -28,7 +28,9 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
     def SayHello(self, request, context):
         print("Got hello from '%s'" % request.name)
-        return helloworld_pb2.HelloReply(message="Nice to meet you, %s! I'm %s." % (request.name, 'python'))
+        return helloworld_pb2.HelloReply(
+            message="Nice to meet you, %s! I'm %s." %
+                    (request.name, 'python server'))
 
 
 def serve():

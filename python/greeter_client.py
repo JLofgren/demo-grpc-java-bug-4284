@@ -15,6 +15,7 @@
 
 from __future__ import print_function
 
+import sys
 import grpc
 
 import helloworld_pb2
@@ -22,11 +23,21 @@ import helloworld_pb2_grpc
 
 
 def run():
-    channel = grpc.insecure_channel('localhost:50051')
+    host = 'localhost'
+    port = 50051
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
+    channel = grpc.insecure_channel('%s:%d' % (host, port))
+
     stub = helloworld_pb2_grpc.GreeterStub(channel)
-    name = 'python'
+    name = 'python client'
     print("Will try to greet the server as " + name)
-    response = stub.SayHello(helloworld_pb2.HelloRequest(name=name))
+    response = stub.SayHello(helloworld_pb2.HelloRequest(name=name),
+        #add a 9k header
+        metadata=(
+            ('x-big-header', 'X'*(1024*9)),
+        )
+    )
     print("Got this response from the server: " + response.message)
 
 

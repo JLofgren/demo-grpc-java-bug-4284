@@ -12,10 +12,10 @@ $ ./gradlew installDist
 
 This creates the scripts `hello-world-server` and
 `hello-world-client` in the
-`build/install/examples/bin/` directory that run the examples. Each
+`build/install/examples/bin/` directory that run the examples. The
 example requires the server to be running before starting the client.
 
-For example, to try the hello world example first run:
+First start the server:
 
 ```
 $ ./build/install/examples/bin/hello-world-server
@@ -25,4 +25,11 @@ And in a different terminal window run:
 
 ```
 $ ./build/install/examples/bin/hello-world-client
+```
+
+The client script takes an optional argument of the port number to connect to.
+The default port is 50051. To connect to a different port:
+
+```
+$ ./build/install/examples/bin/hello-world-client 40051
 ```
