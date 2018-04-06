@@ -38,6 +38,11 @@ def grpcProtocVersion = '1.11.0'
 def nettyTcNativeVersion = '2.0.7.Final'
 
 dependencies {
+
+  /* DEMO: Building netty with the modifications in PR 7853 fixes the problem.
+  https://github.com/netty/netty/pull/7853 */
+  //compile("io.netty:netty-codec-http2:4.1.24.Final-SNAPSHOT") { changing = true }
+
   compile "com.google.api.grpc:proto-google-common-protos:1.0.0"
   compile("io.grpc:grpc-alts:${grpcVersion}") { changing = true }
   compile("io.grpc:grpc-netty:${grpcVersion}") { changing = true }
